@@ -3,10 +3,26 @@
 
 import { isOccupyingOn } from '@resident-core/index';
 
-// --- Global Variables ---
-// These would typically be loaded from Script Properties (via .env)
-const RESIDENTS_SHEET_ID = 'YOUR_SHEET_ID';
-const RESIDENT_EVENT_FORM_ID = 'YOUR_FORM_ID';
+// --- Helper Functions to Get Sheets ---
+
+function getSheet(name: string): GoogleAppsScript.Spreadsheet.Sheet {
+  const properties = PropertiesService.getScriptProperties();
+  const spreadsheetId = properties.getProperty('SPREADSHEET_ID');
+  if (!spreadsheetId) {
+    throw new Error('SPREADSHEET_ID is not set in Script Properties.');
+  }
+  const ss = SpreadsheetApp.openById(spreadsheetId);
+  const sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    throw new Error(`Sheet with name "${name}" not found.`);
+  }
+  return sheet;
+}
+
+function getResidentsSheet() {
+  const sheetName = PropertiesService.getScriptProperties().getProperty('SHEET_NAME_RESIDENTS') || 'Residents';
+  return getSheet(sheetName);
+}
 
 // --- Triggered Functions ---
 
@@ -17,8 +33,9 @@ const RESIDENT_EVENT_FORM_ID = 'YOUR_FORM_ID';
 function onFormSubmit(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
   // TODO: Implement logic to handle new resident, departure, room change
   // 1. Parse the form response to get the selected house.
-  // 2. Call the appropriate handler function (e.g., handleNewResident).
-  // 3. Log the operation to the 'Logs' sheet.
+  // 2. Use helper functions like getResidentsSheet() to access data.
+  // 3. Call the appropriate handler function (e.g., handleNewResident).
+  // 4. Log the operation to the 'Logs' sheet.
   console.log(JSON.stringify(e.response.getItemResponses()));
 }
 
@@ -28,7 +45,7 @@ function onFormSubmit(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
 function syncDataToForms() {
   // TODO: Implement logic to update form dropdowns
   // This needs to handle cascading dropdowns: House -> Rooms
-  // 1. Get all houses, residents, and rooms from the sheets.
+  // 1. Get all houses, residents, and rooms from their respective sheets.
   // 2. Update the 'House' dropdown.
   // 3. Set up logic to update the 'Room' dropdown based on the selected house.
 }
