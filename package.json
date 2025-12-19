@@ -1,0 +1,18 @@
+{
+  "name": "em-cleaning",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EngineMaker Cleaning Management DX",
+  "scripts": {
+    "login": "clasp login",
+    "logout": "clasp logout",
+    "deploy:resident": "cd apps/gas-resident && clasp push -f",
+    "deploy:cleaning": "cd apps/gas-cleaning && clasp push -f",
+    "deploy": "npm run deploy:resident && npm run deploy:cleaning"
+  },
+  "devDependencies": {
+    "@google/clasp": "^2.4.2",
+    "@types/google-apps-script": "^1.0.83",
+    "typescript": "^5.3.3"
+  }
+}

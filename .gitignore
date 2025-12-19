@@ -1,0 +1,15 @@
+# Dependencies
+/node_modules
+
+# clasp
+.clasp.json
+dist/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
