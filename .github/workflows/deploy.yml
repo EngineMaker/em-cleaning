@@ -20,17 +20,22 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # .clasp.json の rootDir は、npm scripts を実行するリポジトリのルートからのパス
       - name: Create .clasp.json for Resident App
         run: |
-          echo '{"scriptId":"${{ secrets.RESIDENT_SCRIPT_ID }}","rootDir":"./apps/gas-resident/src"}' > ./apps/gas-resident/.clasp.json
-      
+          echo '{"scriptId":"${{ secrets.RESIDENT_SCRIPT_ID }}","rootDir":"apps/gas-resident/src"}' > ./apps/gas-resident/.clasp.json
+
       - name: Create .clasp.json for Cleaning App
         run: |
-          echo '{"scriptId":"${{ secrets.CLEANING_SCRIPT_ID }}","rootDir":"./apps/gas-cleaning/src"}' > ./apps/gas-cleaning/.clasp.json
+          echo '{"scriptId":"${{ secrets.CLEANING_SCRIPT_ID }}","rootDir":"apps/gas-cleaning/src"}' > ./apps/gas-cleaning/.clasp.json
 
+      # CLASPRC_JSON は `clasp login` で作られた ~/.clasprc.json をそのまま入れた Secret
       - name: Create .clasprc.json for authentication
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
         run: |
-          echo '{"token":{"access_token":"${{ secrets.CLASPRC_ACCESS_TOKEN }}","scope":"https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/script.webapp.deploy https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/service.management https://www.googleapis.com/auth/logging.read https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/forms","token_type":"Bearer","expiry_date":${{ secrets.CLASPRC_EXPIRY_DATE }},"refresh_token":"${{ secrets.CLASPRC_REFRESH_TOKEN }}"}}' > ~/.clasprc.json
+          printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
+          chmod 600 ~/.clasprc.json
 
       - name: Deploy Resident GAS
         run: npm run deploy:resident
