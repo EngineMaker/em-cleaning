@@ -37,3 +37,52 @@ jobs:
 
       - name: Deploy Cleaning GAS
         run: npm run deploy:cleaning
+
+  # デプロイが落ちたら Discord に知らせる（失敗が GitHub の画面にしか出ず気付けないため）
+  notify-failure:
+    runs-on: ubuntu-latest
+    name: Notify failure
+    needs: [deploy]
+    if: failure()
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/notify-discord
+        with:
+          webhook-url: ${{ secrets.DISCORD_ALERT_WEBHOOK_URL }}
+          user-id: ${{ vars.DISCORD_USER_ID }}
+          message: |
+            🚨 ${{ github.repository }}: ${{ github.workflow }} が失敗しました（GAS は前回のデプロイのまま）
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  # 直前のデプロイが失敗していたときだけ、成功したら復旧を知らせる。
+  # 失敗通知だけだと、直ったのかどうかが Discord 側から分からないため
+  notify-recovery:
+    runs-on: ubuntu-latest
+    name: Notify recovery
+    needs: [deploy]
+    if: success()
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Check previous run
+        id: prev
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          conclusion=$(gh api "repos/${{ github.repository }}/actions/workflows/deploy.yml/runs?branch=main&status=completed&per_page=10" \
+            --jq '[.workflow_runs[] | select(.id != ${{ github.run_id }})][0].conclusion // ""')
+          echo "conclusion=$conclusion" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.prev.outputs.conclusion == 'failure'
+
+      - uses: ./.github/actions/notify-discord
+        if: steps.prev.outputs.conclusion == 'failure'
+        with:
+          webhook-url: ${{ secrets.DISCORD_ALERT_WEBHOOK_URL }}
+          user-id: ${{ vars.DISCORD_USER_ID }}
+          message: |
+            ✅ ${{ github.repository }}: ${{ github.workflow }} が復旧しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
