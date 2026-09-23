@@ -1,0 +1,20 @@
+name: Notify test
+
+# Discord への通知経路（Secret の Webhook URL と action）が生きているかを
+# 手動で確かめる。Secret を登録・更新したら Actions 画面の「Run workflow」から実行する
+on:
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/notify-discord
+        with:
+          webhook-url: ${{ secrets.DISCORD_ALERT_WEBHOOK_URL }}
+          user-id: ${{ vars.DISCORD_USER_ID }}
+          message: |
+            🧪 ${{ github.repository }}: 通知のテストです（デプロイはしていません）
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
