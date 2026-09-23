@@ -6,8 +6,8 @@
   "scripts": {
     "login": "clasp login",
     "logout": "clasp logout",
-    "deploy:resident": "cd apps/gas-resident && clasp push -f",
-    "deploy:cleaning": "cd apps/gas-cleaning && clasp push -f",
+    "deploy:resident": "clasp push --project apps/gas-resident --force",
+    "deploy:cleaning": "clasp push --project apps/gas-cleaning --force",
     "deploy": "npm run deploy:resident && npm run deploy:cleaning"
   },
   "devDependencies": {

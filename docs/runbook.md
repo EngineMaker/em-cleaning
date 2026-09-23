@@ -20,10 +20,18 @@
 
 **注意**: 自動デプロイを有効にするには、リポジトリのGitHub Secretsに以下の情報を設定する必要があります。
 
--   `CLASPRC_ACCESS_TOKEN`
--   `CLASPRC_REFRESH_TOKEN`
--   `CLASPRC_EXPIRY_DATE`
--   各GASプロジェクトの `SCRIPT_ID`
+-   `CLASPRC_JSON`: `npm run login` で作られた `~/.clasprc.json` の中身そのもの
+-   `RESIDENT_SCRIPT_ID` / `CLEANING_SCRIPT_ID`: 各GASプロジェクトのスクリプトID
+
+値を画面に出さないよう、ファイルから直接登録します。
+
+```sh
+gh secret set CLASPRC_JSON < ~/.clasprc.json
+jq -r .scriptId apps/gas-resident/.clasp.json | gh secret set RESIDENT_SCRIPT_ID
+jq -r .scriptId apps/gas-cleaning/.clasp.json | gh secret set CLEANING_SCRIPT_ID
+```
+
+ログインし直した（refresh token が変わった）ときは `CLASPRC_JSON` を登録し直してください。
 
 ## 3. 日常運用
 
